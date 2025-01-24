@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Recognition App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center text-gray-800">Digit Recognition App</h1>
+        <p class="text-gray-600 text-center mt-2">
+            Upload an image of a handwritten digit (0–9), and we'll predict the number!
+        </p>
+
+        <!-- File Upload -->
+        <div class="mt-6">
+            <label class="block text-gray-700 font-medium mb-2" for="fileInput">Choose an image:</label>
+            <input 
+                type="file" 
+                id="fileInput" 
+                accept="image/*" 
+                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            >
+        </div>
+
+        <!-- Predict Button -->
+        <div class="mt-4">
+            <button 
+                id="predictButton" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
+            >
+                Predict
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result" class="mt-6 text-center text-lg font-semibold text-gray-800">
+            <!-- The prediction will appear here -->
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("predictButton").addEventListener("click", async () => {
+            const fileInput = document.getElementById("fileInput");
+            const resultDiv = document.getElementById("result");
+
+            // Clear previous result
+            resultDiv.textContent = "";
+
+            if (!fileInput.files[0]) {
+                resultDiv.textContent = "Please upload an image.";
+                return;
+            }
+
+            // Prepare the file for upload
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            try {
+                // Send the file to the backend API
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error occurred while predicting.");
+                }
+
+                const data = await response.json();
+                resultDiv.textContent = `Predicted Digit: ${data.prediction}`;
+            } catch (error) {
+                resultDiv.textContent = "Failed to get a prediction. Please try again.";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
